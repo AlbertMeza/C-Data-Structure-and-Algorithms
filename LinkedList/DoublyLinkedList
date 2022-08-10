@@ -1,0 +1,270 @@
+using System;
+
+namespace LinkedList
+{
+    public class Node<T>
+    {
+        public Node<T> Next;
+        public Node<T> Prev;
+        public T Value;
+        public Node(T data)
+        {
+            Value = data;
+            Next = null;
+            Prev = null;
+        }
+    }
+
+    public class DoublyLinkedList<T>
+    {
+        public Node<T> head;
+        public Node<T> tail;
+        public Node<T> current; // This will have latest node
+        public int Count;
+        public DoublyLinkedList()
+        { // Empty list does not have node, all pointers are set to null
+            head = tail = current = null;
+            Count = 0;
+        }
+
+        public bool IsEmpty()
+        {
+            return Count == 0;
+        }
+
+        public void AddStart(T data)
+        {
+            Node<T> newNode = new Node<T>(data);
+            if (IsEmpty())
+            {
+                head = tail = current = newNode;
+                newNode.Next = newNode.Prev = null;
+            }
+            else
+            {
+                newNode.Next = head;
+                newNode.Prev = null;
+                head.Prev = newNode;
+                head = current = newNode;
+            }
+            Count++;
+        }
+
+        public void RemoveStart()
+        {
+            if (IsEmpty())
+            {
+                throw new Exception("Can't remove a node from an empty list!");
+            }
+            else if (head.Next == null) // Only one node in the list
+            {
+                head = tail = current = null;
+            }
+            else
+            {
+                head = current = head.Next;
+                head.Prev = null;
+            }
+            Count--;
+        }
+
+        public void AddLast(T data)
+        {
+            var newNode = new Node<T>(data);
+            if (IsEmpty())
+            {
+                head = tail = current = newNode;
+                newNode.Next = newNode.Prev = null;
+            }
+            else
+            {
+                newNode.Next = null;
+                newNode.Prev = tail;
+                tail.Next = newNode;
+                tail = current = newNode;
+            }
+            Count++;
+        }
+
+        public void RemoveLast()
+        {
+            if (IsEmpty())
+            {
+                throw new Exception("Can't remove a node from an empty list!");
+            }
+            else if (head.Next == null) // Only one node in the list
+            {
+                head = tail = current = null;
+            }
+            else
+            {
+                tail = current = tail.Prev;
+                tail.Next = null;
+            }
+            Count--;
+        }
+
+
+        // A new node is inserted after the 'current' node
+        public void InsertNode(T data)
+        {
+            var newNode = new Node<T>(data);
+            if (IsEmpty())
+            {
+                head = tail = current = newNode;
+                newNode.Next = newNode.Prev = null;
+                Count++;
+            }
+            else if (current == tail)
+            { // If the 'current' node is the last one
+                AddLast(data);
+            }
+            else
+            {
+                newNode.Next = current.Next;
+                newNode.Prev = current;
+                current.Next = current.Next.Prev = newNode;
+                current = current.Next;
+                Count++;
+            }
+        }
+
+        public void PrintList()
+        {
+            if (IsEmpty())
+            {
+                Console.WriteLine("Empty list!");
+            }
+            else
+            {
+                Console.Write("--- Head");
+                Node<T> curr = head;
+                while (curr != null) // Advance the pointer
+                {
+                    if (curr == current)
+                    { // Mark the 'current' node with <= =>
+                        Console.Write(" <=");
+                        Console.Write(curr.Value);
+                        Console.Write("=> ");
+                        curr = curr.Next;
+                    }
+                    else
+                    {
+                        Console.Write(" <-");
+                        Console.Write(curr.Value);
+                        Console.Write("-> ");
+                        curr = curr.Next;
+                    }
+                }
+                Console.WriteLine("Tail ---");
+            }
+        }
+
+
+        // 1) check for an empty list, check for list of 1
+        // 2) flip the pointers for each node
+        // 3) flip the head pointer
+
+        public void Reverse()
+        {
+            if (IsEmpty()) { Console.WriteLine("You can't reverse an empty list!"); }
+            else if (this.Count == 1) { Console.WriteLine("How can you prove that I did or did not flip a list of count 1"); }
+            else
+            {
+                current = head;
+                Node<T> temp = null;
+                while (current != null)
+                {
+                    ReverseHelper(current, temp);
+                    current = current.Prev;
+                }
+                temp = tail;
+                tail = head;
+                head = temp;
+                current = tail;
+            }
+        }
+        public void ReverseHelper(Node<T> a, Node<T> b)
+        {
+            b = a.Prev;
+            a.Prev = a.Next;
+            a.Next = b;
+        }
+
+        public void DeleteNodes(T data)
+        {
+            current = head.Next; 
+            while (current != null)
+            {
+                if (head.Value.Equals(data)) RemoveStart();
+                else if (tail.Value.Equals(data)) RemoveLast();
+                else if (current.Value.Equals(data)) 
+                {
+                    current.Next.Prev = current.Prev;
+                    current.Prev.Next = current.Next;
+                }
+                current = current.Next;
+            }
+            current = tail;
+        }
+
+        public void RemoveDuplicateNodes() 
+        {
+            Node<T> pointer = head;
+            while (pointer != null && pointer.Next != null)
+            {
+                current = pointer.Next;
+                while (current != null)
+                {
+                    if (pointer.Value.Equals(tail.Value)) RemoveLast();
+                    else if (pointer.Value.Equals(current.Value))
+                    {
+
+                        current.Next.Prev = current.Prev;
+                        current.Prev.Next = current.Next;
+                    }
+                    current = current.Next; 
+                }
+                pointer = pointer.Next;
+            }
+        }
+    }
+
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var testList = new DoublyLinkedList<int>();
+
+            Console.WriteLine("Insert 5, 6, 7 to the list:");
+            Console.WriteLine();
+            testList.InsertNode(5);
+            testList.InsertNode(6);
+            testList.InsertNode(7);
+            Console.WriteLine("Reverse the Linked List");
+            testList.Reverse();
+            testList.PrintList();
+            Console.WriteLine();
+            Console.WriteLine("Delete all nodes with the value 6");
+            testList.DeleteNodes(6);
+            testList.PrintList();
+            Console.WriteLine();
+            Console.WriteLine("Add a bunch of duplicates");
+            testList.InsertNode(5);
+            testList.InsertNode(5);
+            testList.InsertNode(7);
+            testList.InsertNode(5);
+            testList.InsertNode(6);
+            testList.InsertNode(5);
+            testList.InsertNode(6);
+            testList.InsertNode(7);
+            testList.InsertNode(7);
+            testList.PrintList();
+            Console.WriteLine();
+            Console.WriteLine("Delete all duplicates");
+            testList.RemoveDuplicateNodes();
+            testList.PrintList();
+        }
+    }
+}
