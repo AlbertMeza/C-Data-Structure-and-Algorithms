@@ -1,0 +1,229 @@
+AlbertsStack<int> stackOne = new AlbertsStack<int>();
+Console.WriteLine("Check for empty new stack");
+Console.WriteLine(stackOne.IsEmpty());
+stackOne.Display();
+Console.WriteLine();
+Console.WriteLine("Push 5 new values onto my stack");
+stackOne.Push(18);
+stackOne.Push(8);
+stackOne.Push(24);
+stackOne.Push(29);
+stackOne.Push(11);
+stackOne.Display();
+Console.WriteLine();
+Console.WriteLine("Let's peek!");
+Console.WriteLine(stackOne.Peek());
+Console.WriteLine();
+Console.WriteLine("Look some specific values");
+Console.WriteLine("Does 18 exist in my stack? " + stackOne.Contains(18));
+Console.WriteLine("Does 19 exist in my stack? " + stackOne.Contains(19));
+Console.WriteLine();
+Console.WriteLine("Check my current stack count and capacity");
+Console.WriteLine("Current count at: " + stackOne._Count);
+Console.WriteLine("Current capacity at: " + stackOne._Capacity);
+stackOne.Display();
+Console.WriteLine();
+Console.WriteLine(stackOne.Pop());
+Console.WriteLine(stackOne.Pop());
+Console.WriteLine("Check my current stack count and capacity");
+Console.WriteLine("Current count at: " + stackOne._Count);
+Console.WriteLine("Current capacity at: " + stackOne._Capacity);
+stackOne.Display();
+Console.WriteLine();
+Console.WriteLine("Let's peek!");
+Console.WriteLine(stackOne.Peek());
+Console.WriteLine();
+Console.WriteLine("I will now clear my stack!");
+stackOne.Clears();
+Console.WriteLine("Current count at: " + stackOne._Count);
+Console.WriteLine("Current capacity at: " + stackOne._Capacity);
+stackOne.Display();
+Console.WriteLine();
+Console.WriteLine("Let's use our implemented Stack to test for balancing of paranthesis");
+Console.WriteLine("Let's pass the following string: ((())())()");
+Console.WriteLine("Is this balanced? " + AlbertsStack<char>.Balanced("((())())()"));
+Console.WriteLine("Lets test a couple more");
+Console.WriteLine("Let's pass the following string: )()(");
+Console.WriteLine("Is this balanced? " + AlbertsStack<char>.Balanced(")()("));
+Console.WriteLine("Let's pass the following string: ())");
+Console.WriteLine("Is this balanced? " + AlbertsStack<char>.Balanced("())"));
+Console.WriteLine();
+Console.WriteLine("Hmmmmm two are false, let's find those index of those bugs");
+Console.WriteLine("For )()( the bug is at index: " + AlbertsStack<int>.BalancedIndex(")()("));
+Console.WriteLine("For ()) the bug is at index: " + AlbertsStack<int>.BalancedIndex("())"));
+
+
+
+public class AlbertsStack<T>
+{
+    //properties
+    public int _Count { get; private set; }
+    public int _Capacity { get; private set; }
+    public T[] _Stack { private get; set; }
+
+    //constructor that is empty and default size
+    public AlbertsStack()
+    {
+        this._Capacity = 10; // always sets the initial stack to 10
+        this._Count = 0;
+        this._Stack = new T[_Capacity];
+    }
+
+    //parametric that allows user to set initial capacity
+    public AlbertsStack(int num)
+    {
+        this._Capacity = num;
+        this._Count = 0;
+        this._Stack = new T[_Capacity];
+    }
+
+
+    //public AlbertsStack(T[] values)
+    //{
+    //    this._Capacity = values.Length;
+    //    this._Count = values.Length;
+    //    foreach (T val in values)
+    //    {
+    //        //push each value
+    //    }
+    //}
+
+    //Methods to create
+    //Peek(), Pop(), Push(Object), IsEmpty(), Contains(Object)
+    //Display(), clear();
+    public bool IsEmpty() //checks if the stack is empty
+    {
+        return _Count == 0;
+    }
+
+    private void Resize() //made private to ensure only called within own class
+    {
+        this._Capacity *= 2;
+        T[] temp = new T[_Capacity];
+        for (int i = 0; i < _Count; i++)
+        {
+            temp[i] = _Stack[i];
+        }
+        _Stack = temp;
+    }
+
+    //method to display each value in a stack
+    public void Display()
+    {
+        if (this.IsEmpty()) Console.WriteLine("This stack is empty!");
+        foreach (T val in this._Stack)
+        {
+            Console.Write(val + " ");
+        }
+        Console.WriteLine();
+    }
+
+    //lets user add to the stack
+    public void Push(T value)
+    {
+        //what happens if stack is at capacity;
+        //if at cap, resize
+        //theStack[count] = value;
+        if (this._Count == this._Capacity) this.Resize();
+        else
+        {
+            this._Stack[_Count] = value;
+            this._Count++;
+        }
+    }
+
+    //lets user look at the next value which will be popped (LIFO)
+    public T Peek()
+    {
+        if (this.IsEmpty()) return default; 
+        return this._Stack[_Count - 1];
+    }
+
+    //let user pop the last value(the same one as peek)
+    public T Pop()
+    {
+        T temp;
+        if (this.IsEmpty())
+        {
+            Console.WriteLine("Cannot pop empty stack");
+            temp = default;
+        }
+        else
+        {
+            temp = this._Stack[_Count - 1];
+            this._Stack[_Count - 1] = default;
+            this._Count--;
+        }
+        return temp;
+    }
+
+    //clears an array
+    public void Clears()
+    {
+        if (_Count == 0) Console.WriteLine("This stack is already clear!");
+        else
+        {
+            this._Capacity = 10;
+            this._Count = 0;
+            this._Stack = new T[this._Capacity];
+        }
+    }
+
+    //method to check if stack contains
+    public bool Contains(T value)
+    {
+        foreach (T val in this._Stack)
+        {
+            if (val.Equals(value)) return true;
+        }
+        return false;
+    }
+    
+    //method that checks balancing of parenthesis
+    public static bool Balanced(string test)
+    {
+        bool balanced = false;
+        AlbertsStack<char> charCheck = new AlbertsStack<char>();
+
+        foreach (char c in test)
+        {
+            char curr = charCheck.Peek();
+            switch (c)
+            {
+                case '(':
+                    if (charCheck.IsEmpty()) charCheck.Push(c);
+                    else if (curr == ')') charCheck.Pop();
+                    else charCheck.Push(c);
+                    break;
+                case ')':
+                    if (charCheck.IsEmpty()) return balanced; //test to see if there is no open parenthesis
+                    else if (curr == '(') charCheck.Pop();
+                    break;
+            }
+        }
+        if (charCheck.IsEmpty()) balanced = true;
+
+        return balanced;
+    }
+
+    public static int BalancedIndex(string test)
+    {
+        int culprit = -1;
+        AlbertsStack<int> indexStack = new AlbertsStack<int>();
+        for (int i = 0; i < test.Length; i++)
+        {
+            switch (test[i])
+            {
+                case '(':
+                    indexStack.Push(i);
+                    break;
+                case ')':
+                    if (indexStack.IsEmpty()) return i; //test to see if there is no open parenthesis
+                    indexStack.Pop();
+                    break;
+            }
+        }
+        if (!indexStack.IsEmpty()) culprit = indexStack.Peek();
+        return culprit;
+    }
+}
