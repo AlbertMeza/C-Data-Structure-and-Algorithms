@@ -1,0 +1,166 @@
+using System.Diagnostics;
+
+Random random = new Random();
+Stopwatch stopwatch = new Stopwatch();
+int size = 1000;
+int[] randNums = new int[size];
+int[] randNums1 = new int[size];
+int[] randNums2 = new int[size];
+int[] randNums3 = new int[size];
+int[] randNums4 = new int[size];
+
+for (int i = 0; i < randNums.Length; i++)
+{
+    randNums[i] = random.Next(0, 10001);
+    randNums1[i] = random.Next(0, 10001);
+    randNums2[i] = random.Next(0, 10001);
+    randNums3[i] = random.Next(0, 10001);
+    randNums4[i] = random.Next(0, 10001);
+}
+
+stopwatch.Start();
+BubbleSort(randNums);
+stopwatch.Stop();
+Console.WriteLine($"Regular bubble sort: {stopwatch.Elapsed.TotalMilliseconds}");
+stopwatch.Restart();
+stopwatch.Start();
+SelectionSort(randNums1);
+stopwatch.Stop();
+Console.WriteLine($"Regular selection sort: {stopwatch.Elapsed.TotalMilliseconds}");
+stopwatch.Restart();
+stopwatch.Start();
+InsertionSort(randNums2);
+stopwatch.Stop();
+Console.WriteLine($"Regular insertion sort: {stopwatch.Elapsed.TotalMilliseconds}");
+stopwatch.Restart();
+stopwatch.Start();
+MergeSort(randNums3, 0, randNums.Length - 1);
+stopwatch.Stop();
+Console.WriteLine($"Regular merge sort: {stopwatch.Elapsed.TotalMilliseconds}");
+stopwatch.Restart();
+stopwatch.Start();
+QuickSort(randNums4, 0, randNums.Length - 1);
+stopwatch.Stop();
+Console.WriteLine($"Regular quick sort: {stopwatch.Elapsed.TotalMilliseconds}");
+
+foreach (int i in randNums) Console.WriteLine(i);
+Console.WriteLine();
+foreach (int i in randNums1) Console.WriteLine(i);
+Console.WriteLine();
+foreach (int i in randNums2) Console.WriteLine(i);
+Console.WriteLine();
+foreach (int i in randNums3) Console.WriteLine(i);
+Console.WriteLine();
+foreach (int i in randNums4) Console.WriteLine(i);
+Console.WriteLine();
+
+
+
+//Helper Function
+static void SwapElements(int[] nums, int one, int two)
+{
+    int temp = nums[one];
+    nums[one] = nums[two];
+    nums[two] = temp;
+}
+
+void BubbleSort(int[] nums)
+{
+    for (int i = 0; i < nums.Length - 1; i++)
+    {
+        for (int j = 0; j < nums.Length - 1 - i; j++)
+        {
+            if (nums[j] > nums[j + 1]) SwapElements(nums, j, j + 1);
+        }
+    }
+}
+
+void SelectionSort(int[] nums)
+{
+    int minIndex;
+    for (int i = 0; i < nums.Length; i++)
+    {
+        minIndex = i;
+        for (int j = i; j < nums.Length; j++)
+        {
+            if (nums[j] < nums[minIndex]) minIndex = j;
+        }
+        SwapElements(nums, minIndex, i);
+    }
+}
+
+void InsertionSort(int[] nums)
+{
+    int curVal, i, j;
+    for (i = 1; i < nums.Length; i++)
+    {
+        curVal = nums[i];
+        for (j = i - 1; j >= 0 && nums[j] > curVal; j--)
+        {
+            nums[j + 1] = nums[j];
+        }
+        nums[j + 1] = curVal;
+    }
+}
+
+//The recursive division part of mergesort
+void MergeSort(int[] nums, int left, int right)
+{
+    if (left < right)
+    {
+        int mid = (left + right) / 2;
+        MergeSort(nums, left, mid);
+        MergeSort(nums, mid + 1, right);
+        Merge(nums, left, mid, right);
+    }
+}
+
+//This is the merging part of the sorting
+void Merge(int[] nums, int left, int mid, int right)
+{
+    int[] sorted = new int[right - left + 1];
+    int i = left;
+    int j = mid + 1;
+    int k = 0;
+    while (i <= mid && j <= right)
+    {
+        if (nums[i] > nums[j]) sorted[k++] = nums[j++];
+        else sorted[k++] = nums[i++];
+    }
+    while (i <= mid) sorted[k++] = nums[i++];
+    while (j <= right) sorted[k++] = nums[j++];
+    for (int index = 0; index < sorted.Length; index++)
+    {
+        nums[left + index] = sorted[index];
+    }
+}
+
+
+void QuickSort(int[] arr, int left, int right)
+{
+    // return right way if there is only one element, i.e., left == right,
+    // or there is none, i.e., left > right, 
+    if (left < right)
+    {
+        int p = Partition(arr, left, right); // p is the index of pivot
+        QuickSort(arr, left, p - 1);
+        QuickSort(arr, p + 1, right);
+    }
+}
+int Partition(int[] arr, int left, int right)
+{
+    int pivot = arr[right], tmp; //in this example we always pick the last element as pivot
+    int l = left;
+    int r = right - 1; //subtract one here because last element is pivot
+    while (l < r)
+    {
+        while (arr[l] < pivot && l < r) { l++; }
+        while (arr[r] > pivot && l < r) { r--; }
+        if (l < r) // if the two elements pointed by l and r are out of order, swap them
+        {
+            tmp = arr[l]; arr[l] = arr[r]; arr[r] = tmp;
+        }
+    }
+    tmp = arr[l]; arr[l] = arr[right]; arr[right] = tmp;
+    return l; //l is the index of partition to be returned
+}
