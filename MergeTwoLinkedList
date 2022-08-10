@@ -1,0 +1,46 @@
+using System.Collections; //linked list library
+
+int[] numsOne = { 4, 8, 12, 15 }; //must be presorted
+int[] numsTwo = { 2, 8, 13, 16 }; 
+
+LinkedList<int> list = new LinkedList<int>(numsOne);
+LinkedList<int> list2 = new LinkedList<int>(numsTwo);
+
+LinkedList<int> merged = MergeLinkedList(list, list2);
+Display(merged);
+
+
+static LinkedList<int> MergeLinkedList(LinkedList<int> one, LinkedList<int> two) //returns merged Linked
+{
+    LinkedList<int> result = new LinkedList<int>(); //the LinkedList to return 
+
+    LinkedListNode<int> currentOne = one.First; //iterator through List One 
+    LinkedListNode<int> currentTwo = two.First; //iterator List Two
+
+
+    while (currentOne != null && currentTwo != null) //compare both until one list has been fully added 
+    {
+        if (currentOne.Value < currentTwo.Value) 
+        {
+            result.AddLast(new LinkedListNode<int>(currentOne.Value)); 
+            currentOne = currentOne.Next; 
+        }
+        else
+        {
+            result.AddLast(new LinkedListNode<int>(currentTwo.Value));
+            currentTwo = currentTwo.Next;
+        }
+    }
+    while (currentOne != null) { result.AddLast(new LinkedListNode<int>(currentOne.Value)); currentOne = currentOne.Next; }//add uncompleted list
+    while (currentTwo != null) { result.AddLast(new LinkedListNode<int>(currentTwo.Value)); currentTwo = currentTwo.Next; }//add uncompleted list
+    
+    return result;
+}
+
+static void Display(LinkedList<int> nums)
+{
+    foreach (int i in nums)
+    {
+        Console.Write(i + " ");
+    }
+}
