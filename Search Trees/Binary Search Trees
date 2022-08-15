@@ -1,0 +1,382 @@
+/* 
+ * Binary Search Tree - C# Implementation
+ * Last update 8/8/2022
+ */
+
+using System;
+using System.Collections.Generic;
+
+public class Program
+{
+    public static void Main()
+    {
+        var bst = new BinarySearchTree();
+        /* Let us create following BST
+             5
+            / \
+           3   7
+          / \ / \
+         2  4 6  8  */
+        Console.WriteLine("Let's create a new BST:");
+        bst.Insert(5);
+        bst.Insert(3);
+        bst.Insert(2);
+        bst.Insert(4);
+        bst.Insert(7);
+        bst.Insert(6);
+        bst.Insert(8);
+        Console.WriteLine("Node count: " + bst.Count);
+        bst.DisplayTree2D();
+        Console.WriteLine("The max height is: " + bst.GetMaxHeight());
+        Console.WriteLine("Is this tree balanced: " + bst.BalancedBST());
+
+        ////Create a BST of 20(or less) random numbers(0~99)
+        //var rand = new Random();
+        //for (int i = 0; i < 20; i++)
+        //{
+        //    bst.Insert(rand.Next(0, 100));
+        //}
+
+        Console.WriteLine("\nInorder traversal:");
+        bst.Inorder();
+
+        Console.WriteLine("\nAfter deleting node 3:");
+        bst.DeleteNode(3);
+        bst.DisplayTree2D();
+        Console.WriteLine("The max height is: " + bst.GetMaxHeight());
+        Console.WriteLine("Is this tree balanced: " + bst.BalancedBST());
+
+        Console.WriteLine("\nLet's insert 3 back into the tree (see the difference from the original tree):");
+        bst.Insert(3);
+        bst.DisplayTree2D();
+        Console.WriteLine("The max height is: " + bst.GetMaxHeight());
+        Console.WriteLine("Is this tree balanced: " + bst.BalancedBST());
+
+
+        Console.WriteLine("\nAfter deleting node 5:");
+        bst.DeleteNode(5);
+        bst.DisplayTree2D();
+        Console.WriteLine("The max height is: " + bst.GetMaxHeight());
+        Console.WriteLine("Is this tree balanced: " + bst.BalancedBST());
+
+    }
+}
+
+public class Node
+{
+    public int Key { get; set; }
+    public Node Left { get; set; }
+    public Node Right { get; set; }
+    public Node Parent { get; set; }
+    public Node(int data)
+    {
+        Key = data;
+        Parent = Right = Left = null; // Explicitly set these pointers to null
+    }
+}
+
+// A class defined specifically for method DisplayTree2D()
+public class NodeInfo
+{
+    public Node node;
+    public string text;
+    public int StartPos;
+    public int Size { get { return text.Length; } }
+    public int EndPos { get { return StartPos + Size; } set { StartPos = value - Size; } }
+    public NodeInfo Parent, Left, Right;
+}
+
+public class BinarySearchTree
+{
+    private Node _root;
+    public Node Root { get { return _root; } }
+    public int Count { get; set; }
+    public BinarySearchTree()
+    {
+        _root = null;
+    }
+
+    public void Insert(int data)
+    {
+        Node ptr = _root; // Always start from the root node
+        // If the tree is empty, make new node the root node
+        if (ptr == null)
+        {
+            _root = new Node(data);
+            Count++;
+            return;
+        }
+        
+        // Otherwise, move down the tree
+        while (data<ptr.Key && ptr.Left != null || data>ptr.Key && ptr.Right != null)
+        {
+            if (data < ptr.Key)
+                ptr = ptr.Left;
+            else
+                ptr = ptr.Right;
+        }
+        if (data < ptr.Key) // Make new node left child
+        {
+            ptr.Left = new Node(data);
+            ptr.Left.Parent = ptr;
+            Count++;
+        }
+        else if (data > ptr.Key) // Make new node right child
+        {
+            ptr.Right = new Node(data);
+            ptr.Right.Parent = ptr;
+            Count++;
+        }
+        else
+        {
+            Console.WriteLine($"Can't insert a duplicated integer - {data}");
+        }
+    }
+
+    public void Inorder() //no parameters means start from _root which is a private variable 
+    {
+        Inorder(_root);
+    }
+    private void Inorder(Node ptr)
+    {
+        if (ptr != null)
+        {
+            Inorder(ptr.Left);
+            Console.Write("Node : " + ptr.Key + " , ");
+            if (ptr.Parent == null)
+                Console.WriteLine("Parent : NULL");
+            else
+                Console.WriteLine("Parent : " + ptr.Parent.Key);
+            Inorder(ptr.Right);
+        }
+    }
+
+    public int Predecessor(Node ptr) //finds the node with closet value to the left of it
+    {
+        Node curr = ptr.Left;
+        while (curr.Right != null)
+        {
+            curr = curr.Right;
+        }
+        return curr.Key;
+    }
+
+    public int Successor(Node ptr) //finds the node with closet value to the right of it
+    {
+        Node curr = ptr.Right;
+        while (curr.Left != null)
+        {
+            curr = curr.Left;
+        }
+        return curr.Key;
+    }
+
+    public bool Search(int data)
+    {
+        throw new NotImplementedException("Not ready yet");
+    }
+
+    public bool IsLeaf(Node ptr) //nodes with no children
+    {
+        return ptr.Left == null && ptr.Right == null;
+    }
+
+    public void DeleteNode(int data) //wrapper function to ensure you start at the root
+    {
+        DeleteNode(_root, data);
+    }
+    private void DeleteNode(Node ptr, int data)
+    {
+        if (ptr == null)
+        {
+            Console.WriteLine("No node is deleted!");
+            return;
+        }
+        if (data < ptr.Key)
+            DeleteNode(ptr.Left, data); // Delete the node in the left subtree
+        else if (data > ptr.Key)
+            DeleteNode(ptr.Right, data); // Delete the node in the right subtree
+        else // Found the node to be deleted
+        {
+            if (IsLeaf(ptr)) // If the node is leaf
+            {
+                if (ptr == ptr.Parent.Left)
+                    ptr.Parent.Left = null; //ensure to set the parent's lost child to null
+                else
+                    ptr.Parent.Right = null;
+                return;
+            }
+            // Node with a left child only
+            else if (ptr.Right == null)
+            { // Not a leaf node and does not have a right child
+                ptr = ptr.Left;
+                return;
+            }
+            // Node with a right child only
+            else if (ptr.Left == null)
+            { // Not a leaf node and does not have a left child
+                ptr = ptr.Right;
+                return;
+            }
+            else // Node with both two children
+            {
+                int succ = Successor(ptr);
+                ptr.Key = succ;
+                // Delete the inorder successor
+                DeleteNode(ptr.Right, succ);
+            }
+        }
+
+    }
+    public int GetMaxHeight() //Method to find the height
+    {
+        return GetMaxHeight(_root);
+    }
+
+    public int GetMaxHeight(Node ptr)
+    {
+        if (ptr == null) return 0;
+
+        else 
+        {
+            int leftHeight = GetMaxHeight(ptr.Left);
+            int rightHeight = GetMaxHeight(ptr.Right);
+
+            if (leftHeight > rightHeight) return leftHeight + 1;
+            else return rightHeight + 1;
+        }
+    }
+
+    public bool BalancedBST() //Method that checks if the tree is balanced
+    {
+        return BalancedBST(_root);
+    } 
+
+    public bool BalancedBST(Node ptr)
+    {
+        int left, right;
+
+        if (ptr == null) return true;
+
+        left = GetHeight(ptr.Left);
+        right = GetHeight(ptr.Right);
+
+        if (Math.Abs(left - right) <= 1 && BalancedBST(ptr.Left) && BalancedBST(ptr.Right))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public int GetHeight(Node ptr)
+    {
+        if (ptr == null) return 0;
+
+        int leftHeight = GetMaxHeight(ptr.Left);
+        int rightHeight = GetMaxHeight(ptr.Right);
+
+        if (leftHeight > rightHeight) return leftHeight + 1;
+        else return rightHeight + 1;
+    }
+
+    // A simple in-order display of all nodes 
+    private void DisplayTree(Node ptr)
+    {
+        if (ptr == null)
+        {
+            return;
+        }
+        DisplayTree(ptr.Left);
+        Console.Write(ptr.Key + " ");
+        DisplayTree(ptr.Right);
+    }
+    public void DisplayTree()
+    {
+        DisplayTree(Root);
+    }
+
+    /* 
+     * Display of BST in a console window
+     * Source of the following code:
+     * //https://stackoverflow.com/questions/36311991/c-sharp-display-a-binary-search-tree-in-console
+     * //https://newbedev.com/c-display-a-binary-search-tree-in-console
+     */
+    public void DisplayTree2D()
+    {
+        Node root = _root;
+        string textFormat = "0";
+        int spacing = 1;
+        int topMargin = 0;
+        int leftMargin = 1;
+        if (root == null) return;
+        int rootTop = Console.CursorTop + topMargin;
+        var last = new List<NodeInfo>();
+        var next = root;
+        for (int level = 0; next != null; level++)
+        {
+            var item = new NodeInfo { node = next, text = next.Key.ToString(textFormat) };
+            if (level < last.Count)
+            {
+                item.StartPos = last[level].EndPos + spacing;
+                last[level] = item;
+            }
+            else
+            {
+                item.StartPos = leftMargin;
+                last.Add(item);
+            }
+            if (level > 0)
+            {
+                item.Parent = last[level - 1];
+                if (next == item.Parent.node.Left)
+                {
+                    item.Parent.Left = item;
+                    item.EndPos = Math.Max(item.EndPos, item.Parent.StartPos - 1);
+                }
+                else
+                {
+                    item.Parent.Right = item;
+                    item.StartPos = Math.Max(item.StartPos, item.Parent.EndPos + 1);
+                }
+            }
+            next = next.Left ?? next.Right;
+            for (; next == null; item = item.Parent)
+            {
+                int top = rootTop + 2 * level;
+                Print(item.text, top, item.StartPos);
+                if (item.Left != null)
+                {
+                    Print("/", top + 1, item.Left.EndPos);
+                    Print("_", top, item.Left.EndPos + 1, item.StartPos);
+                }
+                if (item.Right != null)
+                {
+                    Print("_", top, item.EndPos, item.Right.StartPos - 1);
+                    Print("\\", top + 1, item.Right.StartPos - 1);
+                }
+                if (--level < 0) break;
+                if (item == item.Parent.Left)
+                {
+                    item.Parent.StartPos = item.EndPos + 1;
+                    next = item.Parent.node.Right;
+                }
+                else
+                {
+                    if (item.Parent.Left == null)
+                        item.Parent.EndPos = item.StartPos - 1;
+                    else
+                        item.Parent.StartPos += (item.StartPos - 1 - item.Parent.EndPos) / 2;
+                }
+            }
+        }
+        Console.SetCursorPosition(0, rootTop + 2 * last.Count - 1);
+        Console.WriteLine();
+    }
+    private static void Print(string s, int top, int left, int right = -1)
+    {
+        Console.SetCursorPosition(left, top);
+        if (right < 0) right = left + s.Length;
+        while (Console.CursorLeft < right) Console.Write(s);
+    }
+}
