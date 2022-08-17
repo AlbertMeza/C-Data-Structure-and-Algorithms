@@ -1,0 +1,42 @@
+int[] nums = { 2, 7, 11, 15 };
+int[] answer = TwoSumsN2(nums, 17);
+Display(answer);
+int[] hashAnswer = TwoSumsHash(nums, 17);
+Display(hashAnswer);
+
+
+int[] TwoSumsN2(int[] nums, int target)
+{
+    int lookFor;
+    for(int i = 0; i < nums.Length; i++)
+    {
+        lookFor = target - nums[i];
+        for (int j = i + 1; j < nums.Length; j++)
+        {
+            if (nums[j] == lookFor) return new int[] { nums[i], nums[j] };
+        }
+    }
+    throw new Exception ( "not found" );
+}
+
+int[] TwoSumsHash(int[] nums, int target)
+{
+    Dictionary<int, int> hash = new Dictionary<int, int>();
+
+    for (int i = 0; i < nums.Length; i++)
+    {
+        if (hash.ContainsKey(target - nums[i])) return new int[] { target - nums[i], nums[i] };
+        else hash[nums[i]] = i;
+    }
+    throw new Exception("");
+}
+
+//helper function
+static void Display(int[] nums)
+{
+    foreach (int i in nums)
+    {
+        Console.Write(i + " ");
+    }
+Console.WriteLine();
+}
